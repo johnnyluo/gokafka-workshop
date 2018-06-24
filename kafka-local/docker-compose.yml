@@ -1,0 +1,25 @@
+version: '3'
+services:
+  zookeeper:
+    image: 'confluent/zookeeper'
+    ports:
+      - '2181:2181'
+    environment:
+      - zk_id="1"
+  kafka:
+    image: 'confluent/kafka'
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_HOST_NAME=localhost #very important , otherwise you can't log in
+  kafkamgr:
+    image: 'sheepkiller/kafka-manager'
+    ports:
+      - '9000:9000'
+    environment:
+      - ZK_HOSTS=zookeeper:2181
+      - APPLICATION_SECRET=letmein
+    
