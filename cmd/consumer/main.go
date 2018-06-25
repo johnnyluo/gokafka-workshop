@@ -3,7 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Shopify/sarama"
 )
@@ -14,8 +17,9 @@ func main() {
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "my-kafka-producer"
 	cfg.Producer.Return.Successes = true
-	cfg.Producer.RequiredAcks = sarama.WaitForAll
+	cfg.Consumer.Offsets.Initial = sarama.OffsetOldest
 	cfg.Consumer.Return.Errors = true
+
 	//cfg.Version = sarama.V1_1_0_0
 	c, err := sarama.NewClient([]string{"localhost:9092"}, cfg)
 	if nil != err {
@@ -39,7 +43,10 @@ func main() {
 		wg.Add(1)
 		go processMessage(wg, pc, donechan)
 	}
-	// clean exit
+
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	<-signals
 	close(donechan)
 	wg.Wait()
 }
@@ -54,7 +61,7 @@ func processMessage(wg *sync.WaitGroup, pc sarama.PartitionConsumer, donechan ch
 			if !more {
 				return
 			}
-			fmt.Printf("we got a message,key:%s,msg:%s", string(msg.Key), string(msg.Value))
+			fmt.Printf("we got a message,key:%s,msg:%s partition:%d, offset:%d \n", string(msg.Key), string(msg.Value), msg.Partition, msg.Offset)
 		case <-donechan:
 			pc.AsyncClose()
 		}
