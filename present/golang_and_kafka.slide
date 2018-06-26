@@ -1,0 +1,37 @@
+Kafka And Go
+Use kafka in golang microservice
+25 Jun 2018
+
+Johnny Luo
+Platform,Campaign Monitor
+johnnyluo1980@gmail.com
+@johnnyluo1980
+
+* What we are going to cover today
+- About Me
+- About Kafka
+- Kafka in Campaign Monitor
+- Producer
+- Consumer
+
+* About Me
+- My name is Johnny Luo
+- I am a platform engineer working in Campaign Monitor
+
+* About Kafka
+
+* Kafka at Campaign Monitor
+
+* Producer
+** Sync Producer
+
+* Producer
+** Async Producer
+
+* Consumer
+** Partition Consumer
+
+* Consumer
+** Cluster Consumer
+
+
