@@ -22,7 +22,7 @@ func main() {
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "my-kafka-producer"
 	cfg.Producer.Return.Successes = true
-	cfg.Producer.RequiredAcks = sarama.WaitForLocal
+	cfg.Producer.RequiredAcks = sarama.WaitForAll
 	cfg.Producer.Return.Errors = true
 	cfg.Producer.Flush.Bytes = 65535
 	cfg.Producer.Flush.Frequency = 500 * time.Millisecond

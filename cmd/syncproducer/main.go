@@ -7,16 +7,22 @@ import (
 	"github.com/Shopify/sarama"
 )
 
+var (
+	topic = flag.String("topic", "mytopic", "kafka topic you want to publish message to")
+	key   = flag.String("key", "mykey", "message key")
+	msg   = flag.String("msg", "my message", "the message content you want to publish")
+)
+
 func main() {
-	topic := flag.String("topic", "mytopic", "kafka topic you want to publish message to")
-	key := flag.String("key", "mykey", "message key")
-	msg := flag.String("msg", "my message", "the message content you want to publish")
 	flag.Parse()
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "my-kafka-producer"
+	// The following three settings are quite important for Sync Producer
 	cfg.Producer.Return.Successes = true
+	cfg.Producer.Return.Errors = true
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
-	//cfg.Version = sarama.V1_1_0_0
+
+	cfg.Version = sarama.V1_1_0_0
 	c, err := sarama.NewClient([]string{"localhost:9092"}, cfg)
 	if nil != err {
 		panic(err)

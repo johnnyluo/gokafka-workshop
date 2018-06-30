@@ -7,31 +7,81 @@ Platform,Campaign Monitor
 johnnyluo1980@gmail.com
 @johnnyluo1980
 
+: Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so as our
+: other product team can build their product on top of it. Now I would like everyone here to do me a favor, let around you, if you don't know them , please introduce yourself to each other. I will give you a minute.
+
 * What we are going to cover today
-- About Me
 - About Kafka
-- Kafka in Campaign Monitor
 - Producer
 - Consumer
+: It is a golang meetup , of course we are going to talk about go, since we need to use Kafka , it is important to understand some basic concept , so we will talk about a little bit Kafka first
+: then I will jump right in to show you how we going to produce messages to kafka and consume messages from it.
 
-* About Me
-- My name is Johnny Luo
-- I am a platform engineer working in Campaign Monitor
+* What is Kafka ?
+.link https://kafka.apache.org/ Apache Kafka
+: Before we start , a show of hands , how many of you use kafka?
+- Kafka is a distributed messaging system, originally built at LinkedIn , and now it is  part of the Apache Software Foundation
+- It run as a cluster on one or more servers
+- Publish and subscribe to streams of records, similar to a message queue or enterprise messaging system
+- Store streams of records in a fault-tolerant durable way.
+- Process streams of records as they occur.
 
-* About Kafka
+* Kafka
+- Producer
+: Producer is the application or service that send messages to Kafka
+- Consumer
+: Consumer is the applicatoin or service that get message from Kafka
+.image producer_consumer.png
+
+* Kafka
+- Topic, a topic can have multiple partitions
+- Partition
+.image log-anatomy.png
+
+* More about Kafka
+- At least once delivery
+- Order is guarantee at partition level
+- Messages in Kafka topic is persistent , set your retention period accordingly 
+- Make sure your replica is more than 1
+
 
 * Kafka at Campaign Monitor
+- We are running a 16 nodes Kafka cluster in AWS
+- We publish events to Kafka from both MicroService, and Monolith
+- so far we have about 1.5 billon events flow through our Kafka cluster every day.
+
+* Run kafka on your local machine
+ go get -u github.com/johnnyluo/gokafka-workshop
+ cd kafka-local
+ docker-compose up -d
+- We will be using Shopify/sarama library
+ go get -u github.com/Shopify/sarama
+ go get -u github.com/bsm/sarama-cluster
 
 * Producer
-** Sync Producer
+A few ways to publish message to kafka
+
+- Sync Producer
+ Sync Producer is easy to implement, and have stronger guarantee, but the performance won't be great
+- Async Producer
+ Async Producer will be much faster, it will need far more code to implement
+
+: Sync producer means the library will send the message to Kafka broker before it return,while Async will buffer the messages you send to the library , and then flush to the broker on a interval
+- ACK (WaitForLocal,WaitForAll)
+
+
+* Sync Producer
+.code ../cmd/syncproducer/main.go /cfg := sarama.NewConfig()/,/defer func()/
 
 * Producer
-** Async Producer
+Async Producer
 
 * Consumer
-** Partition Consumer
+Partition Consumer
 
 * Consumer
-** Cluster Consumer
+Cluster Consumer
 
-
+* Workshop
+- go get -u github.com/johnnyluo/gokafka-workshop
+- Code to produce messages
