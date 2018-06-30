@@ -71,16 +71,13 @@ A few ways to publish message to kafka
 
 
 * Sync Producer
-.code ../cmd/syncproducer/main.go /cfg := sarama.NewConfig()/,/defer func()/
 
 * Producer
-Async Producer
 
 * Consumer
-Partition Consumer
 
 * Consumer
-Cluster Consumer
+
 
 * Workshop
 - go get -u github.com/johnnyluo/gokafka-workshop
