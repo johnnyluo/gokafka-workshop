@@ -8,62 +8,73 @@ johnnyluo1980@gmail.com
 @johnnyluo1980
 
 : Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so  our
-: other product teams can build their product features on top of it. Now I would like everyone here to do me a favor, let around you, if you don't know them , please introduce yourself to each other. I will give you a minute.
+: other product teams can build their product features on top of it. Now I would like everyone here to do me a favor, look on your left , and look on your right, if you don't know them , please introduce yourself to each other. I will give you a minute.
 
 * What we are going to cover today
 - About Kafka
 - Producer
 - Consumer
-: It is a golang meetup , of course we are going to talk about go, since we need to use Kafka , it is important to understand some basic concept , so we will talk about a little bit Kafka first
-: then I will jump right in to show you how we going to produce messages to kafka and consume messages from it.
+: It is a golang meetup , and I love golang so ,of course we are going to talk about go, since we need to use Kafka , it is important to understand some basic concept , so we will talk about a little bit Kafka first
+: then I will jump right in to show you how we are going to produce messages to kafka and consume messages from it using go.
 
 * What is Kafka ?
 .link https://kafka.apache.org/ Apache Kafka
-: Before we start , a show of hands , how many of you use kafka?
-- Kafka is a distributed messaging system, originally built at LinkedIn , and now it is  part of the Apache Software Foundation
-- It run as a cluster on one or more servers
-- Publish and subscribe to streams of records, similar to a message queue or enterprise messaging system
+: how many of you played with kafka? how many of you run Kafka in your production environment? ok , Thank you very much.
+- Kafka is a distributed messaging system, originally built at LinkedIn , and now it is  part of the Apache Software Foundation.
+- Kafka is often used in big data , for data injection. 
+: I give you an example, you have a web app / web site like us, you would like to collect all the web activities , like opens / clicks / page views etc, you might have 
+: multiple consumers of these data, one service will consume these messages to show a live dashboard, antoher one might use it to aggregate data for analytics. 
+- It usually run as a cluster on one or more servers, each server we call it a broker.
+- Publish and subscribe to streams of records, similar to a message queue
 - Store streams of records in a fault-tolerant durable way.
 - Process streams of records as they occur.
 
 * Kafka
 - Producer
-: Producer is the application or service that send messages to Kafka
+: Producer is an application or service that send messages to Kafka
 - Consumer
-: Consumer is the applicatoin or service that get message from Kafka
+: Consumer is an applicatoin or service that get message from Kafka
 .image producer_consumer.png
+: the beauty of this design is , your producer can inject messages as fast as they want, and different consumers can consume message at their own speed.
+
 
 * Kafka
-- Topic, a topic can have multiple partitions
+- Topic a topic can have multiple partitions
 - Partition
 
 .image log-anatomy.png
+: all Kafka messages are organized into topics, if you wish to send a message to Kafka, you need to send it to a specfic topic, if you wish to read a message from Kafka, you need to read it from a topic,
+: a Topic will have multiple partitions.  partitions are the actually log files. The position of each message in a partition, we call it offset
 
-* More about Kafka
-- Partition matters, because it will determinate how much parallelism you can achieve. Estimate your production traffic while choosing your partitions 
-- At least once delivery
+* Kafka
+- Partition number is very important, because it will determinate how much parallelism you can achieve. Estimate your production traffic while choosing your partitions 
+- Kafka guarantee at least once delivery, you need try your best to make sure consumer is idempotent.
 - Order is guarantee at partition level
 - Messages in Kafka topic is persistent , set your retention period accordingly 
+: the longer you want to keep it in Kafka , the more disk space you will need.
 - Make sure your replica is more than 1
-- 
 
+* Kafka
+When you decide to create a topic in kafka, you need to think about the following few questions.
+- How many partitions in this topic?
+- How long should I keep the record? (retention period)
+- How many copies of the data should you keep? (replica)
 
 * Kafka at Campaign Monitor
 - We are running a 16 nodes Kafka cluster in AWS
-- We publish events to Kafka from both MicroService, and Monolith
+- We publish events to Kafka from both MicroService, and (c#)Monolith
 - so far we have about 1.5 billon events flow through our Kafka cluster every day.
-
-* Run kafka on your local machine
- go get -u github.com/johnnyluo/gokafka-workshop
- cd kafka-local
- docker-compose up -d
-- We will be using Shopify/sarama library
- go get -u github.com/Shopify/sarama
- go get -u github.com/bsm/sarama-cluster
+: for a topic that doesn't have too much traffic , we set the partition number to 16, while a very busy topic, we set the partition to 64
+: and we keep all the events for 20 days, and replica is 3
 
 * Producer
-A few ways to publish message to kafka
+Before you publish messages to Kafka topic, you need to ask yourself these questions
+- Consistency ?
+- Availability ?
+: So what it means consistency, once you hand off your message to the library ,can you afford to lose the message? after you send the message to broker , if the broker get into trouble, and died, what behavour you expected?
+: if one or the broker get into trouble, can you afford to lose message?  (unlean leader election)
 
+* Producer 
 - Sync Producer
  Sync Producer is easy to implement, and have stronger guarantee, but the performance won't be great
 - Async Producer
@@ -76,6 +87,15 @@ A few ways to publish message to kafka
 * Producer
 Live Demo
 .image bluedemobutton.jpg 400 400
+
+* Run kafka on your local machine
+ go get -u github.com/johnnyluo/gokafka-workshop
+ cd kafka-local
+ docker-compose up -d
+- We will be using Shopify/sarama library
+ go get -u github.com/Shopify/sarama
+ go get -u github.com/bsm/sarama-cluster
+
 
 * Consumer
 There are two types of consumer
