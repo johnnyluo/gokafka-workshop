@@ -7,8 +7,8 @@ Platform,Campaign Monitor
 johnnyluo1980@gmail.com
 @johnnyluo1980
 
-: Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so as our
-: other product team can build their product on top of it. Now I would like everyone here to do me a favor, let around you, if you don't know them , please introduce yourself to each other. I will give you a minute.
+: Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so  our
+: other product teams can build their product features on top of it. Now I would like everyone here to do me a favor, let around you, if you don't know them , please introduce yourself to each other. I will give you a minute.
 
 * What we are going to cover today
 - About Kafka
@@ -36,13 +36,16 @@ johnnyluo1980@gmail.com
 * Kafka
 - Topic, a topic can have multiple partitions
 - Partition
+
 .image log-anatomy.png
 
 * More about Kafka
+- Partition matters, because it will determinate how much parallelism you can achieve. Estimate your production traffic while choosing your partitions 
 - At least once delivery
 - Order is guarantee at partition level
 - Messages in Kafka topic is persistent , set your retention period accordingly 
 - Make sure your replica is more than 1
+- 
 
 
 * Kafka at Campaign Monitor
@@ -65,20 +68,37 @@ A few ways to publish message to kafka
  Sync Producer is easy to implement, and have stronger guarantee, but the performance won't be great
 - Async Producer
  Async Producer will be much faster, it will need far more code to implement
+- Trade off between consistency and throughput
 
 : Sync producer means the library will send the message to Kafka broker before it return,while Async will buffer the messages you send to the library , and then flush to the broker on a interval
 - ACK (WaitForLocal,WaitForAll)
 
-
-* Sync Producer
-
 * Producer
+Live Demo
+.image bluedemobutton.jpg 400 400
 
 * Consumer
+There are two types of consumer
+- Partition consumer
+- Cluster consumer
 
 * Consumer
+What is Partition Consumer? 
+- Each Partition Consumer can only consume messages from one partition.
+- You have to manage your own offsets
 
+* Partition Consumer
+Live Demo
+.image bluedemobutton.jpg 400 400
 
-* Workshop
-- go get -u github.com/johnnyluo/gokafka-workshop
-- Code to produce messages
+* Cluster Consumer
+- Consumer Group
+- Competing consumer, each consumer will maintain a heartbeat with broker, when more consumer join the same consumer group, or some consumers get dropped out, broker will do rebalance , make sure no two consumers are reading from the same partition.
+- Offsets is managed by Kafka using a special topic
+ __consumer_offsets
+- Client need to commit offsets, offsets are often commit async
+- If you have many busy topics , you need to be careful of hotspot
+
+* Cluster Consumer
+Live Demo
+.image bluedemobutton.jpg 400 400

@@ -20,14 +20,27 @@ var (
 func main() {
 	flag.Parse()
 	cfg := sarama.NewConfig()
+
+	// Setup your client id appropriately , otherwise the library will generate a uuid for you
 	cfg.ClientID = "my-kafka-producer"
+
+	// If you care about whether your messages had been published successfully,then please set the following two to true
+	// trust me , most of the time , you do care
 	cfg.Producer.Return.Successes = true
 	cfg.Producer.Return.Errors = true
+	// wait for the in sync replica to ack, strong consistency , but slow.
+	// This is also related to min.insync.replicas
+	// balance between high available / high consistency
+	// cluster level or topic level
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
+	// How frequent to flush the messages to broker. best effort which ever comes first.
+	// the way to tune for producing performance
 	cfg.Producer.Flush.Bytes = 65535
 	cfg.Producer.Flush.Frequency = 500 * time.Millisecond
 	//cfg.Producer.Flush.Messages = 100
-	//cfg.Version = sarama.V1_1_0_0
+
+	cfg.Version = sarama.V1_1_0_0
+	// broker accept a slice, make sure you give multiple broker address, or a DNS
 	c, err := sarama.NewClient([]string{"127.0.0.1:9092"}, cfg)
 	if nil != err {
 		panic(err)
@@ -37,6 +50,7 @@ func main() {
 		panic(err)
 	}
 	defer func() {
+		// make sure you do closet the async producer, it is important , otherwise you might risk or losing message
 		if err := p.Close(); nil != err {
 			fmt.Printf("error while closing producer:%s", err)
 		}
@@ -44,9 +58,11 @@ func main() {
 	wg := &sync.WaitGroup{}
 	donechan := make(chan struct{})
 	wg.Add(2)
+	// start to process success and error notifications in a seperate go routine
 	go processSuccessAndError(wg, p)
 	go publicMessages(*num, wg, p, donechan)
 	signals := make(chan os.Signal, 1)
+
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-signals
 	close(donechan)
@@ -57,6 +73,7 @@ func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 	defer wg.Done()
 	for {
 		select {
+		// errors will happen, when broker are going through a leader election, it will return EOF on the client library
 		case e, more := <-p.Errors():
 			if !more {
 				return

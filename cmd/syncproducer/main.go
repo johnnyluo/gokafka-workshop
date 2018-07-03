@@ -18,11 +18,16 @@ func main() {
 	cfg := sarama.NewConfig()
 	cfg.ClientID = "my-kafka-producer"
 	// The following three settings are quite important for Sync Producer
+	// it tell the library need to tell us whether the message publish is success or failure
 	cfg.Producer.Return.Successes = true
 	cfg.Producer.Return.Errors = true
+	// WaitForAll means we need to wait until in sync replica to ack before it return, has strong consistency,but slow
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
-
 	cfg.Version = sarama.V1_1_0_0
+
+	// Make sure you pass in multiple brokers when it is multiple node cluster
+	// client use the address to boostrap , will send request to the broker for meta data
+	// and it will discover other brokers from there.
 	c, err := sarama.NewClient([]string{"localhost:9092"}, cfg)
 	if nil != err {
 		panic(err)
@@ -32,13 +37,17 @@ func main() {
 		panic(err)
 	}
 	defer func() {
+		// Please do remember to close the producer
 		if err := p.Close(); nil != err {
 			fmt.Printf("error while closing producer:%s", err)
 		}
 	}()
 	pmsg := &sarama.ProducerMessage{
 		Topic: *topic,
-		Key:   sarama.StringEncoder(*key),
+		// Available Encoder include StringEncoder, ByteEncoder
+		// Key will be used to decide which partition to publish to,(guarantee order), choose it wisely
+		Key: sarama.StringEncoder(*key),
+		// if the value is string , then use StringEncoder, otherwise use ByteEncoder
 		Value: sarama.StringEncoder(*msg),
 	}
 	partition, offset, err := p.SendMessage(pmsg)
