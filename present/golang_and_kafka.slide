@@ -1,6 +1,6 @@
 Kafka And Go
 Use kafka in golang microservice
-25 Jun 2018
+07 Aug 2018
 
 Johnny Luo
 Platform,Campaign Monitor
@@ -8,7 +8,7 @@ johnnyluo1980@gmail.com
 @johnnyluo1980
 
 : Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so  our
-: other product teams can build their product features on top of it. Now I would like everyone here to do me a favor, look on your left , and look on your right, if you don't know them , please introduce yourself to each other. I will give you a minute.
+: other product teams can build their product features on top of it. 
 
 * What we are going to cover today
 - About Kafka
