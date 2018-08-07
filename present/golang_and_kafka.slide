@@ -3,23 +3,27 @@ Use kafka in golang microservice
 07 Aug 2018
 
 Johnny Luo
-Platform,Campaign Monitor
+Platform
+Campaign Monitor
 johnnyluo1980@gmail.com
 @johnnyluo1980
 
-: Hello everyone, thanks for coming tonight. Before we start, let me introduce myself, my name is Johnny, I am an engineer working in Platform team at Campaign Monitor, we build distribute systems so  our
+: Hello everyone, thanks for coming tonight. Before we start, let me introduce myself,why I am talking here? my name is Johnny Luo, I am an engineer here at Campaign Monitor. I work in platform team, we build distribute systems so our
 : other product teams can build their product features on top of it. 
+: By now I have been in Campaign Monitor for about three years now, in the last two years, we use golang to build quite a lot micro services which become part of the campaign monitor core systems.  We also have some battle scars with Kafka, so I think it will be good to share
+: all these with you all, hope you take away something with you tonight.
 
 * What we are going to cover today
 - About Kafka
 - Producer
 - Consumer
-: It is a golang meetup , and I love golang so ,of course we are going to talk about go, since we need to use Kafka , it is important to understand some basic concept , so we will talk about a little bit Kafka first
-: then I will jump right in to show you how we are going to produce messages to kafka and consume messages from it using go.
+: This is what we are going to cover today,  first of all , I will give you a little bit introduction about kafka, it is quite important to understand some basic concept used in Kafka , if you want to use it well. 
+: It is a golang meetup , and I love golang so ,of course we are going to talk about go . I will do some live demo about how to publish messages to Kafka, and how to consume from Kafka.
 
 * What is Kafka ?
 .link https://kafka.apache.org/ Apache Kafka
-: how many of you played with kafka? how many of you run Kafka in your production environment? ok , Thank you very much.
+: how many of you played with kafka? 
+: how many of you run Kafka in your production environment? ok , Thank you very much.
 - Kafka is a distributed messaging system, originally built at LinkedIn , and now it is  part of the Apache Software Foundation.
 - Kafka is often used in big data , for data injection. 
 : I give you an example, you have a web app / web site like us, you would like to collect all the web activities , like opens / clicks / page views etc, you might have 
