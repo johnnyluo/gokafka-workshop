@@ -23,12 +23,12 @@ func main() {
 	cfg.Producer.Return.Errors = true
 	// WaitForAll means we need to wait until in sync replica to ack before it return, has strong consistency,but slow
 	cfg.Producer.RequiredAcks = sarama.WaitForAll
-	cfg.Version = sarama.V1_1_0_0
 
+	// Since we are running a one node
 	// Make sure you pass in multiple brokers when it is multiple node cluster
 	// client use the address to boostrap , will send request to the broker for meta data
 	// and it will discover other brokers from there.
-	c, err := sarama.NewClient([]string{"localhost:9092"}, cfg)
+	c, err := sarama.NewClient([]string{"127.0.0.1:9092"}, cfg)
 	if nil != err {
 		panic(err)
 	}
@@ -37,7 +37,7 @@ func main() {
 		panic(err)
 	}
 	defer func() {
-		// Please do remember to close the producer
+		// Please do remember to close the producer, otherwise you are going to have a bad day
 		if err := p.Close(); nil != err {
 			fmt.Printf("error while closing producer:%s", err)
 		}

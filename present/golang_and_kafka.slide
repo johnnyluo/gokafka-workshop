@@ -13,6 +13,9 @@ johnnyluo1980@gmail.com
 : By now I have been in Campaign Monitor for about three years now, in the last two years, we use golang to build quite a lot microservices which become part of the campaign monitor core systems.  We also have some battle scars with Kafka, so I think it will be good to share
 : all these with you all, hope you take away something with you tonight.
 
+* A little bit about myself
+
+
 * What we are going to cover today
 - About Kafka
 - Producer
