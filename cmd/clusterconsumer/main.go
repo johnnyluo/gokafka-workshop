@@ -23,7 +23,7 @@ func main() {
 	cfg.Consumer.Offsets.Initial = sarama.OffsetOldest
 	cfg.Consumer.Offsets.CommitInterval = 500 * time.Millisecond
 	cfg.Consumer.Return.Errors = true
-	cfg.Version = sarama.V1_1_0_0
+
 	c, err := cluster.NewClient([]string{"localhost:9092"}, cfg)
 	if nil != err {
 		panic(err)
@@ -33,15 +33,24 @@ func main() {
 	if nil != err {
 		panic(err)
 	}
+	defer func() {
+		if err := consumer.Close(); nil != err {
+			fmt.Printf("fail to close consumer,err:%s\n", err)
+		}
+		if err := c.Close(); nil != err {
+			fmt.Printf("fail to close the client,err:%s\n", err)
+		}
+	}()
+
 	wg := &sync.WaitGroup{}
-	donechan := make(chan struct{})
+	done := make(chan struct{})
 	wg.Add(2)
-	go processMessage(wg, consumer, donechan)
+	go processMessage(wg, consumer, done)
 	go processNotification(wg, consumer.Notifications())
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-signals
-	close(donechan)
+	close(done)
 	wg.Wait()
 }
 
@@ -60,7 +69,7 @@ func processNotification(wg *sync.WaitGroup, notification <-chan *cluster.Notifi
 		}
 	}
 }
-func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer, donechan chan struct{}) {
+func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer, done chan struct{}) {
 	defer wg.Done()
 	for {
 		select {
@@ -75,7 +84,7 @@ func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer, donechan chan stru
 			}
 			fmt.Printf("we got a message,key:%s,msg:%s partition:%d, offset:%d \n", string(msg.Key), string(msg.Value), msg.Partition, msg.Offset)
 			pc.MarkOffset(msg, "")
-		case <-donechan:
+		case <-done:
 			pc.Close()
 		}
 	}

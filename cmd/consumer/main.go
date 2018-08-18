@@ -15,12 +15,9 @@ func main() {
 	topic := flag.String("topic", "mytopic", "kafka topic you want to publish message to")
 	flag.Parse()
 	cfg := sarama.NewConfig()
-	cfg.ClientID = "my-kafka-producer"
-	cfg.Producer.Return.Successes = true
-	cfg.Consumer.Offsets.Initial = sarama.OffsetOldest
+	cfg.ClientID = "my-kafka-consumer"
 	cfg.Consumer.Return.Errors = true
 
-	//cfg.Version = sarama.V1_1_0_0
 	c, err := sarama.NewClient([]string{"localhost:9092"}, cfg)
 	if nil != err {
 		panic(err)
@@ -29,25 +26,34 @@ func main() {
 	if nil != err {
 		panic(err)
 	}
+	defer func() {
+		if err := consumer.Close(); nil != err {
+			fmt.Printf("fail to close consumer,err:%s\n", err)
+		}
+		if err := c.Close(); nil != err {
+			fmt.Printf("fail to close the client,err:%s\n", err)
+		}
+	}()
 	partitions, err := consumer.Partitions(*topic)
 	if nil != err {
 		panic(err)
 	}
 	wg := &sync.WaitGroup{}
-	donechan := make(chan struct{})
+	done := make(chan struct{})
 	for _, p := range partitions {
+		// start from offset 0
 		pc, err := consumer.ConsumePartition(*topic, p, 0)
 		if nil != err {
 			panic(err)
 		}
 		wg.Add(1)
-		go processMessage(wg, pc, donechan)
+		go processMessage(wg, pc, done)
 	}
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-signals
-	close(donechan)
+	close(done)
 	wg.Wait()
 }
 

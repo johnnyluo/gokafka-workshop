@@ -8,19 +8,21 @@ Campaign Monitor
 johnnyluo1980@gmail.com
 @johnnyluo1980
 
-: Good evening, thanks for coming tonight. Before we start, let me introduce myself,why I am talking here? my name is Johnny Luo, I am an engineer here at Campaign Monitor. I work in platform team, we build distribute systems so our
-: other product teams can build their product features on top of it. 
-: By now I have been in Campaign Monitor for about three years now, in the last two years, we use golang to build quite a lot microservices which become part of the campaign monitor core systems.  We also have some battle scars with Kafka, so I think it will be good to share
-: all these with you all, hope you take away something with you tonight.
+: Good evening everyone, thanks for coming to this meetup. 
+: Before we start , how many of you use GO part of your day to day job?
+: How many of you use Kafka?
+: First of all , allow me to introduce myself, and why I am talking here? 
+: My name is Johnny Luo, I am an engineer in platform team at Campaign Monitor. As part of the platform team , we build distributed systems , so as  other product can build product features on top of it.  
+: During the last two years, we used GO to build quite a lot Microservices ,to be precisely  I counted it when I am preparing this talk, we have about 30 Go Services running in production at the moment, they are  serving millions of  requests every hour. They become quite core foundation of Campaign Monitor platform.
+: Almost at the same time , we start to stream events through Kafka, gradually for some data , Kafka become the source of truth. The more we use these two technologies, the more we learned about it
+: quite honestly we earn some battle scars with it, that’s why I am talking here , hopefully these experience can benefit you as well.
 
-* A little bit about myself
-
-
-* What we are going to cover today
+* Agenda
 - About Kafka
 - Producer
 - Consumer
-: This is what we are going to cover today,  first of all , I will give you a little bit introduction about kafka, it is quite important to understand some basic concept used in Kafka , if you want to use it well. 
+
+: This is what we are going to cover today,  This is a Golang meetup , so I am trying to not talk too much about kafka, I will give you a little bit introduction about kafka, it is quite important to understand some basic concept used in Kafka , if you want to use it well. 
 : It is a golang meetup , and I love golang so ,of course we are going to talk about go . I will do some live demo about how to publish messages to Kafka, and how to consume from Kafka.
 
 * What is Kafka ?
@@ -35,6 +37,14 @@ johnnyluo1980@gmail.com
 - Publish and subscribe to streams of records, similar to a message queue
 - Store streams of records in a fault-tolerant durable way.
 - Process streams of records as they occur.
+
+* Kafka Key concept
+- Topic
+- Partition
+- Replica
+- Retention period
+
+* Libraries can talk to Kafka
 
 * Kafka
 - Producer

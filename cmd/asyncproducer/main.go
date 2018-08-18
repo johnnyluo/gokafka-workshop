@@ -37,9 +37,7 @@ func main() {
 	// the way to tune for producing performance
 	cfg.Producer.Flush.Bytes = 65535
 	cfg.Producer.Flush.Frequency = 500 * time.Millisecond
-	//cfg.Producer.Flush.Messages = 100
 
-	cfg.Version = sarama.V1_1_0_0
 	// broker accept a slice, make sure you give multiple broker address, or a DNS
 	c, err := sarama.NewClient([]string{"127.0.0.1:9092"}, cfg)
 	if nil != err {
@@ -53,6 +51,9 @@ func main() {
 		// make sure you do closet the async producer, it is important , otherwise you might risk or losing message
 		if err := p.Close(); nil != err {
 			fmt.Printf("error while closing producer:%s", err)
+		}
+		if err := c.Close(); nil != err {
+			fmt.Printf("error while closing client:%s", err)
 		}
 	}()
 	wg := &sync.WaitGroup{}
@@ -81,7 +82,10 @@ func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 			fmt.Printf("Oops! we fail to publish message to kafka broker,err:%s\n", e.Err)
 			// TODO: save the message to somewhere for retry later
 			// continue
-		case s := <-p.Successes():
+		case s, more := <-p.Successes():
+			if !more {
+				return
+			}
 			key, err := s.Key.Encode()
 			if nil != err {
 				fmt.Printf("fail to encode key,err:%s", err)
@@ -94,7 +98,7 @@ func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 		}
 	}
 }
-func publicMessages(count int, wg *sync.WaitGroup, p sarama.AsyncProducer, donechan chan struct{}) {
+func publicMessages(count int, wg *sync.WaitGroup, p sarama.AsyncProducer, done chan struct{}) {
 	defer wg.Done()
 	for i := 0; i < count; i++ {
 		pmsg := &sarama.ProducerMessage{
@@ -104,7 +108,7 @@ func publicMessages(count int, wg *sync.WaitGroup, p sarama.AsyncProducer, donec
 		}
 
 		select {
-		case <-donechan:
+		case <-done:
 			return
 		case p.Input() <- pmsg:
 		}

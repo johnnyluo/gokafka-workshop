@@ -32,6 +32,7 @@ func main() {
 	if nil != err {
 		panic(err)
 	}
+
 	p, err := sarama.NewSyncProducerFromClient(c)
 	if nil != err {
 		panic(err)
@@ -41,7 +42,11 @@ func main() {
 		if err := p.Close(); nil != err {
 			fmt.Printf("error while closing producer:%s", err)
 		}
+		if err := c.Close(); nil != err {
+			fmt.Printf("error while closing client:%s", err)
+		}
 	}()
+
 	pmsg := &sarama.ProducerMessage{
 		Topic: *topic,
 		// Available Encoder include StringEncoder, ByteEncoder
