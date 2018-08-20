@@ -72,6 +72,7 @@ func main() {
 }
 func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 	defer wg.Done()
+
 	for {
 		select {
 		// errors will happen, when broker are going through a leader election, it will return EOF on the client library

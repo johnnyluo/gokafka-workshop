@@ -45,12 +45,15 @@ func main() {
 	wg := &sync.WaitGroup{}
 	done := make(chan struct{})
 	wg.Add(2)
-	go processMessage(wg, consumer, done)
+	go processMessage(wg, consumer)
 	go processNotification(wg, consumer.Notifications())
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-signals
 	close(done)
+	if err := consumer.Close(); nil != err {
+		fmt.Printf("fail to close consumer, err:%s\n", err)
+	}
 	wg.Wait()
 }
 
@@ -69,7 +72,7 @@ func processNotification(wg *sync.WaitGroup, notification <-chan *cluster.Notifi
 		}
 	}
 }
-func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer, done chan struct{}) {
+func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer) {
 	defer wg.Done()
 	for {
 		select {
@@ -84,8 +87,6 @@ func processMessage(wg *sync.WaitGroup, pc *cluster.Consumer, done chan struct{}
 			}
 			fmt.Printf("we got a message,key:%s,msg:%s partition:%d, offset:%d \n", string(msg.Key), string(msg.Value), msg.Partition, msg.Offset)
 			pc.MarkOffset(msg, "")
-		case <-done:
-			pc.Close()
 		}
 	}
 }

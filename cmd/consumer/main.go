@@ -57,18 +57,18 @@ func main() {
 	wg.Wait()
 }
 
-func processMessage(wg *sync.WaitGroup, pc sarama.PartitionConsumer, donechan chan struct{}) {
+func processMessage(wg *sync.WaitGroup, pc sarama.PartitionConsumer, done chan struct{}) {
 	defer wg.Done()
 	for {
 		select {
 		case err := <-pc.Errors():
-			fmt.Printf("Opps, there is an err:%s", err)
+			fmt.Printf("Ooops, there is an err:%s", err)
 		case msg, more := <-pc.Messages():
 			if !more {
 				return
 			}
 			fmt.Printf("we got a message,key:%s,msg:%s partition:%d, offset:%d \n", string(msg.Key), string(msg.Value), msg.Partition, msg.Offset)
-		case <-donechan:
+		case <-done:
 			pc.AsyncClose()
 		}
 	}
