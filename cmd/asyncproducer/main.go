@@ -49,25 +49,22 @@ func main() {
 	}
 	defer func() {
 		// make sure you do closet the async producer, it is important , otherwise you might risk or losing message
-		if err := p.Close(); nil != err {
-			fmt.Printf("error while closing producer:%s", err)
-		}
 		if err := c.Close(); nil != err {
 			fmt.Printf("error while closing client:%s", err)
 		}
 	}()
 	wg := &sync.WaitGroup{}
-	donechan := make(chan struct{})
+	done := make(chan struct{})
 	wg.Add(2)
 	// start to process success and error notifications in a seperate go routine
 	go processSuccessAndError(wg, p)
-	go publicMessages(*num, wg, p, donechan)
+	go publicMessages(*num, wg, p, done)
 	signals := make(chan os.Signal, 1)
 
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	<-signals
-	close(donechan)
-	p.Close()
+	close(done)
+	p.AsyncClose()
 	wg.Wait()
 }
 func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
@@ -90,10 +87,12 @@ func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 			key, err := s.Key.Encode()
 			if nil != err {
 				fmt.Printf("fail to encode key,err:%s", err)
+				continue
 			}
 			content, err := s.Value.Encode()
 			if nil != err {
 				fmt.Printf("fail to encode message value,err:%s\n", err)
+				continue
 			}
 			fmt.Printf("we successfully publish msg with key:%s,msg:%s,partition:%d,offset:%d\n", string(key), string(content), s.Partition, s.Offset)
 		}
