@@ -58,7 +58,7 @@ func main() {
 	wg.Add(2)
 	// start to process success and error notifications in a seperate go routine
 	go processSuccessAndError(wg, p)
-	go publicMessages(*num, wg, p, done)
+	go publishMessages(*num, wg, p, done)
 	signals := make(chan os.Signal, 1)
 
 	signal.Notify(signals, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
@@ -98,7 +98,7 @@ func processSuccessAndError(wg *sync.WaitGroup, p sarama.AsyncProducer) {
 		}
 	}
 }
-func publicMessages(count int, wg *sync.WaitGroup, p sarama.AsyncProducer, done chan struct{}) {
+func publishMessages(count int, wg *sync.WaitGroup, p sarama.AsyncProducer, done chan struct{}) {
 	defer wg.Done()
 	for i := 0; i < count; i++ {
 		pmsg := &sarama.ProducerMessage{
