@@ -61,7 +61,10 @@ func processMessage(wg *sync.WaitGroup, pc sarama.PartitionConsumer, done chan s
 	defer wg.Done()
 	for {
 		select {
-		case err := <-pc.Errors():
+		case err, more := <-pc.Errors():
+			if !more {
+				return
+			}
 			fmt.Printf("Ooops, there is an err:%s", err)
 		case msg, more := <-pc.Messages():
 			if !more {
