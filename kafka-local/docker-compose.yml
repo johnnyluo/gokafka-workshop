@@ -6,7 +6,7 @@ services:
       - '2181:2181'
     environment:
       - zk_id="1"
-  kafka:
+  kafka-1:
     image: 'confluentinc/cp-kafka'
     ports:
       - '9092:9092'
@@ -15,7 +15,10 @@ services:
     environment:
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - KAFKA_ADVERTISED_HOST_NAME=localhost
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - CONFLUENT_METRICS_ENABLE='false'  
+      - CONFLUENT_METRICS_REPORTER_ZOOKEEPER_CONNECT=zookeeper:2181
+      - CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS=1
   kafkamgr:
     image: 'sheepkiller/kafka-manager'
     ports:
